@@ -23,7 +23,7 @@ parser.add_argument('--dist', action='store_true')
 
 parser.add_argument('--root_dir', type=str, default='./')
 parser.add_argument('--data_dir', type=str, default='./data')
-parser.add_argument('--log_name', type=str, default='cifar_meta_16_20_4_run1')
+parser.add_argument('--log_name', type=str, default='test')
 
 parser.add_argument('--lr', type=float, default=0.025)
 parser.add_argument('--wd', type=float, default=3e-4)
@@ -46,8 +46,8 @@ cfg = parser.parse_args()
 
 os.chdir(cfg.root_dir)
 
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
 
 cfg.log_dir = os.path.join(cfg.root_dir, 'logs', cfg.log_name + '_eval')
 cfg.ckpt_dir = os.path.join(cfg.root_dir, 'ckpt', cfg.log_name)

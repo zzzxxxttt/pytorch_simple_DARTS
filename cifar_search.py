@@ -27,6 +27,8 @@ parser.add_argument('--root_dir', type=str, default='./')
 parser.add_argument('--data_dir', type=str, default='./data')
 parser.add_argument('--log_name', type=str, default='test')
 
+parser.add_argument('--order', type=str, default='1st', choices=['1st', '2nd'])
+
 parser.add_argument('--w_lr', type=float, default=0.025)
 parser.add_argument('--w_min_lr', type=float, default=0.001)
 parser.add_argument('--w_wd', type=float, default=3e-4)
@@ -58,8 +60,8 @@ os.makedirs(cfg.log_dir, exist_ok=True)
 os.makedirs(cfg.ckpt_dir, exist_ok=True)
 
 
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
 
 
 def main():
@@ -117,8 +119,9 @@ def main():
                                                 device_ids=[cfg.local_rank, ],
                                                 output_device=cfg.local_rank)
 
-  # # proxy_model is used for 2nd order update
-  # proxy_model = Network(cfg.init_ch, cfg.num_cells, cfg.num_nodes).cuda()
+  # proxy_model is used for 2nd order update
+  if cfg.order == '2nd':
+    proxy_model = Network(cfg.init_ch, cfg.num_cells, cfg.num_nodes).cuda()
 
   count_parameters(model)
 
@@ -147,14 +150,15 @@ def main():
       if epoch > cfg.a_start:
         optimizer_a.zero_grad()
 
-        # # using 1st order update
-        outputs = model(inputs_a)
-        val_loss = criterion(outputs, targets_a)
-        val_loss.backward()
-
-        # # using 2nd order update
-        # val_loss = update(model, proxy_model, criterion, optimizer_w,
-        #                   inputs_a, targets_a, inputs_w, targets_w)
+        if cfg.order == '1st':
+          # using 1st order update
+          outputs = model(inputs_a)
+          val_loss = criterion(outputs, targets_a)
+          val_loss.backward()
+        else:
+          # using 2nd order update
+          val_loss = update(model, proxy_model, criterion, optimizer_w,
+                            inputs_a, targets_a, inputs_w, targets_w)
 
         optimizer_a.step()
       else:

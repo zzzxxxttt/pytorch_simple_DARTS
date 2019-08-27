@@ -17,14 +17,14 @@ from utils.summary import create_summary, create_logger
 torch.backends.cudnn.benchmark = True
 
 # Training settings
-parser = argparse.ArgumentParser(description='classification_baselines')
+parser = argparse.ArgumentParser(description='darts')
 
 parser.add_argument('--local_rank', type=int, default=0)
 parser.add_argument('--dist', action='store_true')
 
 parser.add_argument('--root_dir', type=str, default='./')
 parser.add_argument('--data_dir', type=str, default='./data')
-parser.add_argument('--log_name', type=str, default='cifar_meta_16_20_4_run4')
+parser.add_argument('--log_name', type=str, default='test')
 
 parser.add_argument('--lr', type=float, default=0.05)
 parser.add_argument('--lr_steps', type=str, default='30,60,90')
@@ -50,8 +50,8 @@ cfg.lr_steps = [int(s) for s in cfg.lr_steps.split(',')]
 
 os.chdir(cfg.root_dir)
 
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
 
 cfg.log_dir = os.path.join(cfg.root_dir, 'logs', cfg.log_name + '_imgnet_eval')
 cfg.ckpt_dir = os.path.join(cfg.root_dir, 'ckpt', cfg.log_name)
